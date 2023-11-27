@@ -48,7 +48,7 @@ const FileShare = ({ socket }) => {
 
 			try {
 				const response = await axios.post(
-					"http://127.0.0.1:5000/upload",
+					"https://securevoiceflask.onrender.com/upload",
 					formData
 				);
 
@@ -76,7 +76,7 @@ const FileShare = ({ socket }) => {
 	const handleReceiveButtonClick = async () => {
 		try {
 			const response = await axios.post(
-				"http://127.0.0.1:5000/download",
+				"https://securevoiceflask.onrender.com/download",
 				{ number: receivedNumber },
 				{
 					responseType: "blob", // Set responseType to 'blob' to receive binary data

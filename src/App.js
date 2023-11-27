@@ -8,7 +8,7 @@ import HelloComponent from "./HelloComponent";
 import io from "socket.io-client";
 import FileShare from "./FileShare";
 
-const socket = io.connect("http://localhost:3001");
+const socket = io.connect("https://securevoicenode.onrender.com");
 
 function App() {
 	return (
