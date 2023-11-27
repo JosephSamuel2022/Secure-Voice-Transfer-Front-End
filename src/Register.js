@@ -3,6 +3,7 @@ import DatePicker from "react-datepicker";
 import "react-datepicker/dist/react-datepicker.css";
 import axios from "axios";
 import { parse } from "node-html-parser";
+import CryptoJS from "crypto-js";
 import {
 	MDBBtn,
 	MDBContainer,
@@ -16,20 +17,12 @@ import {
 import { useNavigate } from "react-router-dom";
 import "./App.css";
 import { useState, useRef } from "react";
-import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { faMale, faFemale } from "@fortawesome/free-solid-svg-icons";
+import { database } from "./firebase-config";
+import { getDatabase, ref, set, get } from "firebase/database";
 
 function Register() {
 	const navigate = useNavigate();
-	const [gender, setGender] = useState("male");
-	const today = new Date();
-	const defaultDate = new Date(
-		today.getFullYear() - 20,
-		today.getMonth(),
-		today.getDate()
-	);
 
-	const [dateOfBirth, setDateOfBirth] = useState(defaultDate);
 	const [pid, setPid] = useState("");
 	const [password, setPassword] = useState("");
 	const [name, setName] = useState("");
@@ -39,42 +32,52 @@ function Register() {
 
 	const [passwordError, setPasswordError] = useState(false);
 	const [patientError, setPatientError] = useState(false);
-	const datePickerRef = useRef(null);
+
 	const [termsAgreed, setTermsAgreed] = useState(false);
+
+	const generateMD5Hash = (inputString) => {
+		const hash = CryptoJS.MD5(inputString).toString(CryptoJS.enc.Hex);
+		return hash;
+	};
 
 	const handleRegister = async () => {
 		// Prepare the data to be sent to the API
 		if (!pid || !name || !password) {
 			if (!pid) setPidError(true);
 			if (!name) setNameError(true);
-			if (!dateOfBirth) setDateOfBirthError(true);
+
 			if (!password) setPasswordError(true);
 			if (!termsAgreed) setTermsError(true);
 			return;
 		}
-
 		if (termsAgreed) {
-			const data = {
-				pid: pid,
-				dob: dateOfBirth,
-				gender: gender,
-				password: password,
+			const userData = {
 				name: name,
+				password: password,
 			};
 
 			try {
 				setPatientError(false);
-				const response = await axios.post(
-					"https://respiratory-backend.onrender.com/api/signup",
-					data
-				);
-				const html = response.data;
-				const root = parse(html);
-				const answerElement = root.querySelector("#result-data");
-				const extractedAnswer = answerElement.text;
 
-				if (extractedAnswer === "no") setPatientError(true);
-				else navigate("/");
+				// Get a reference to the "users" node in your Firebase Realtime Database
+				const tpassword = generateMD5Hash(password);
+				const db = getDatabase();
+				set(ref(db, "users/" + pid), {
+					name: name,
+					password: tpassword,
+				});
+				// Check if the user already exists
+				// const userSnapshot = await get(ref(usersRef, pid));
+
+				// if (userSnapshot.exists()) {
+				// 	setPatientError(true);
+				// } else {
+				console.log("Bye");
+				// User doesn't exist, so register them
+				// await set(ref(usersRef, pid), userData); // Store user data under the phone number (pid)
+				// await db.ref("./users/" + pid).set(userData);
+				navigate("/");
+				// }
 			} catch (error) {
 				console.error("Error:", error);
 			}
@@ -151,10 +154,7 @@ function Register() {
 			<MDBRow>
 				<MDBCol sm='6'>
 					<div className='d-flex flex-row logo-containerr'>
-						<img src='/images/docicon.jpg' className='img-fluid me-3' />
-						<span className='h1 fw-bold mb-0'>
-							Respiratory Imbalance Predictor
-						</span>
+						<span className='h1 fw-bold mb-0 tempd'>Secure Voice Transfer</span>
 					</div>
 
 					<div className='d-flex flex-column justify-content-center align-items-center login-containerr'>
@@ -167,7 +167,7 @@ function Register() {
 						<div className='d-flex flex-row align-items-center mb-4 w-50'>
 							<MDBIcon fas icon='id-card-alt me-3' size='lg' />
 							<MDBInput
-								label='Patient ID'
+								label='Phone Number'
 								id='form0'
 								type='text'
 								size='lg'
@@ -180,7 +180,7 @@ function Register() {
 						<div className='d-flex flex-row align-items-center mb-4 w-50'>
 							<MDBIcon fas icon='user me-3' size='lg' />
 							<MDBInput
-								label='Patient Name'
+								label='Name'
 								id='form2'
 								type='text'
 								size='lg'
@@ -188,71 +188,6 @@ function Register() {
 								onBlur={handleNameBlur}
 							/>
 							{nameError && <div className='error-text'>*</div>}
-						</div>
-						<div className='mb-4'>
-							<FontAwesomeIcon icon={faMale} size='lg' className='me-2' />
-							<MDBRadio
-								inline
-								label='Male'
-								value='male'
-								checked={gender === "male"}
-								onChange={handleGenderChange}
-							/>
-							<FontAwesomeIcon icon={faFemale} size='lg' className='me-2' />
-							<MDBRadio
-								inline
-								label='Female'
-								value='female'
-								checked={gender === "female"}
-								onChange={handleGenderChange}
-							/>
-						</div>
-
-						<div className='form-outline datepicker mb-4 w-50'>
-							<div className='d-flex align-items-center'>
-								<MDBIcon far icon='calendar-alt me-3' size='lg' />
-								<MDBInput
-									label='Date of Birth'
-									id='form1'
-									type='text'
-									size='lg'
-									value={
-										dateOfBirth
-											? dateOfBirth.toLocaleDateString("en-GB", {
-													day: "2-digit",
-													month: "2-digit",
-													year: "numeric",
-											  })
-											: ""
-									}
-									onClick={toggleDatePicker}
-									readOnly
-								/>
-							</div>
-
-							<DatePicker
-								ref={datePickerRef}
-								className='form-control d-none'
-								selected={dateOfBirth}
-								onChange={handleDateChange}
-								dateFormat='dd-MM-yyyy'
-								showYearDropdown
-								scrollableYearDropdown
-								yearDropdownItemNumber={100}
-								customDropdownStyles={{
-									dropdown: {
-										top: "unset",
-										bottom: "100%",
-										transform: "translateY(-8px)",
-										position: "absolute",
-									},
-									yearDropdown: {
-										maxHeight: "100px",
-										overflowY: "auto",
-									},
-								}}
-								maxDate={new Date(2023, 11, 31)}
-							/>
 						</div>
 
 						<div className='d-flex flex-row align-items-center mb-4 w-50'>
@@ -299,7 +234,7 @@ function Register() {
 				</MDBCol>
 				<MDBCol sm='6' className='d-none d-sm-block px-0'>
 					<img
-						src='/images/maledoctor.png'
+						src='/images/voice.png'
 						alt='Login image'
 						className='w-100'
 						style={{ objectFit: "cover", objectPosition: "left" }}

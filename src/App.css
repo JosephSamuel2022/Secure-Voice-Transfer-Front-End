@@ -1,55 +1,130 @@
-.login-container {
-	display: flex;
-	margin-top: -50px;
-	align-items: center;
-	justify-content: center;
+html,
+body {
+	padding: 0;
+	margin: 0;
+	font-family: -apple-system, BlinkMacSystemFont, Segoe UI, Roboto, Oxygen,
+		Ubuntu, Cantarell, Fira Sans, Droid Sans, Helvetica Neue, sans-serif;
 }
 
-.logo-container {
-	display: flex;
-	align-items: center;
-	justify-content: center;
-	margin-top: 100px;
-	margin-bottom: 100px; /* Adjust the margin as per your design */
-}
-.login-containerr {
-	display: flex;
-	margin-top: -70px;
-	align-items: center;
-	justify-content: center;
+a {
+	color: inherit;
+	text-decoration: none;
 }
 
-.logo-containerr {
-	display: flex;
-	align-items: center;
-	justify-content: center;
-	margin-top: 40px;
-	margin-bottom: 100px; /* Adjust the margin as per your design */
+* {
+	box-sizing: border-box;
 }
 
-.input-container {
-	display: flex;
-	align-items: center;
-	justify-content: center;
+.places-container {
+	position: absolute;
+	top: 10px;
+	left: 50%;
+	transform: translateX(-50%);
+	z-index: 10;
+	width: 300px;
 }
 
-.input-custom-width {
-	width: 20px; /* Adjust the width as per your requirement */
+.map-container {
+	width: 100%;
+	height: 100vh;
 }
 
-img.w-100 {
-	height: 100vh; /* Set the height to 100% of the viewport height */
-	object-fit: cover;
-	object-position: left;
+.combobox-input {
+	width: 100%;
+	padding: 0.5rem;
 }
-/* Add styles for the date picker input field */
-/* custom-styles.css */
-.form-control {
-	background-color: transparent;
+
+.odiv {
+	margin-left: 500px;
+}
+
+.leaflet-container {
+	height: 100vh;
+	width: 100vw;
+}
+
+.custom-height {
+	height: 100vh;
+	width: 50vw;
+}
+
+.tempc {
+	margin-top: 20vh;
+	margin-left: 13vw;
+}
+
+.tempd {
+	margin-top: 10vh;
+	margin-left: 13vw;
 }
 
 .error-text {
 	color: red;
-	font-size: 20px;
-	margin-left: 5px;
+}
+.file-share-container {
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+	margin-top: 20px;
+}
+
+.input-section {
+	margin-bottom: 20px;
+}
+
+.file-section {
+	align-items: center;
+}
+
+.received-number {
+	font-weight: bold;
+	margin-bottom: 10px;
+	color: #ff5733; /* Orange color for received number */
+}
+
+input[type="number"] {
+	padding: 8px;
+	margin-right: 10px;
+	border: 1px solid #ddd;
+	border-radius: 5px;
+}
+
+button {
+	padding: 8px 15px;
+	background-color: #186106; /* Yellow button background */
+	color: #fff;
+	border: none;
+	border-radius: 5px;
+	cursor: pointer;
+	transition: background-color 0.3s ease;
+}
+
+button:hover {
+	background-color: #ffc107; /* Darker yellow on hover */
+}
+
+input[type="file"] {
+	display: none; /* Hide the file input */
+}
+
+.file-upload-label {
+	padding: 8px 15px;
+	background-color: #3498db; /* Blue color for file upload button */
+	color: #fff;
+	border: none;
+	border-radius: 5px;
+	cursor: pointer;
+	transition: background-color 0.3s ease;
+}
+
+.file-upload-label:hover {
+	background-color: #2980b9; /* Darker blue on hover */
+}
+
+.file-receive-button {
+	margin-top: 10px;
+}
+
+.file-upload-label {
+	margin-bottom: 20px;
 }

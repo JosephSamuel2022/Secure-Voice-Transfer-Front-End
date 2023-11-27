@@ -1,54 +1,66 @@
 import React, { useState } from "react";
-import axios from "axios";
-import { parse } from "node-html-parser";
 import {
-	MDBBtn,
 	MDBContainer,
 	MDBRow,
 	MDBCol,
-	MDBRadio,
 	MDBInput,
+	MDBBtn,
 	MDBIcon,
-	MDBCheckbox,
+	MDBDropdown,
+	MDBDropdownToggle,
+	MDBDropdownMenu,
+	MDBDropdownItem,
 } from "mdb-react-ui-kit";
 import { useNavigate } from "react-router-dom";
-import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { faMale, faFemale } from "@fortawesome/free-solid-svg-icons";
+import { database } from "./firebase-config";
+import { getDatabase, ref, get } from "firebase/database";
+import CryptoJS from "crypto-js";
 
 import "./App.css";
 
 function Login() {
+	const [selectedRole, setSelectedRole] = useState("client");
 	const navigate = useNavigate();
 	const [patientError, setPatientError] = useState(false);
+
 	function handleSwitchToRegister() {
 		navigate("/register");
 	}
-	const [pid, setPid] = useState("");
-	const [password, setPassword] = useState("");
+	const handleRoleChange = (value) => {
+		setSelectedRole(value);
+	};
+	const [pid, setPid] = useState(0);
+	const [password, setPassword] = useState(0);
+
+	const generateMD5Hash = (inputString) => {
+		const hash = CryptoJS.MD5(inputString).toString(CryptoJS.enc.Hex);
+		return hash;
+	};
 
 	const handleLogin = async () => {
-		// Prepare the data to be sent to the API
-		const data = {
-			pid: pid,
-			password: password,
-		};
-
 		try {
 			setPatientError(false);
-			const response = await axios.post(
-				"https://respiratory-backend.onrender.com/api/login",
-				data
-			);
 
-			const html = response.data;
-			const root = parse(html);
-			const answerElement = root.querySelector("#result-data");
-			const extractedAnswer = answerElement.text;
-			console.log("Result Data:", extractedAnswer);
-			if (extractedAnswer === "true") {
-				// Navigate to the PredictForm component
-				sessionStorage.setItem("patientId", pid);
-				navigate("/predict");
+			const db = getDatabase();
+			const locationsRef = ref(db, "users/" + pid);
+
+			const snapshot = await get(locationsRef);
+
+			if (snapshot.exists()) {
+				const userData = snapshot.val();
+				console.log(userData.password);
+
+				// Check if the user exists and the password matches
+				if (String(userData.password) === generateMD5Hash(password)) {
+					console.log("hello");
+					const userName = userData.name;
+
+					// Store the user's ID in sessionStorage
+					sessionStorage.setItem("userId", userName);
+					navigate("/file");
+				} else {
+					setPatientError(true);
+				}
 			} else {
 				setPatientError(true);
 			}
@@ -64,16 +76,13 @@ function Login() {
 	function handlePasswordChange(e) {
 		setPassword(e.target.value);
 	}
-
 	return (
 		<MDBContainer fluid>
 			<MDBRow>
 				<MDBCol sm='6'>
 					<div className='d-flex flex-row logo-container'>
-						<img src='/images/docicon.jpg' className='img-fluid me-3' />
-						<span className='h1 fw-bold mb-0'>
-							Respiratory Imbalance Predictor
-						</span>
+						{/* <img src='/images/taxi.avif' className='img-fluid me-3' /> */}
+						<span className='h1 fw-bold mb-0 tempc'>Secure Voice Transfer</span>
 					</div>
 
 					<div className='d-flex flex-column justify-content-center align-items-center h-custom-2  pt-4 login-container'>
@@ -86,9 +95,9 @@ function Login() {
 						<div className='d-flex flex-row align-items-center mb-4 w-50'>
 							<MDBIcon fas icon='id-card-alt me-3' size='lg' />
 							<MDBInput
-								label='Patient ID'
+								label='Phone Number'
 								id='form0'
-								type='text'
+								type='tel'
 								size='lg'
 								onChange={handlePidChange}
 							/>
@@ -102,6 +111,23 @@ function Login() {
 								size='lg'
 								onChange={handlePasswordChange}
 							/>
+						</div>
+
+						<div className='d-flex flex-row align-items-center mb-4 w-50'>
+							<MDBIcon fas icon='user me-3' size='lg' />
+							<MDBDropdown>
+								<MDBDropdownToggle>
+									{selectedRole === "client" ? "Client" : "Server"}
+								</MDBDropdownToggle>
+								<MDBDropdownMenu>
+									<MDBDropdownItem onClick={() => handleRoleChange("client")}>
+										Client
+									</MDBDropdownItem>
+									<MDBDropdownItem onClick={() => handleRoleChange("server")}>
+										Server
+									</MDBDropdownItem>
+								</MDBDropdownMenu>
+							</MDBDropdown>
 						</div>
 						{patientError && (
 							<div className='error-text'>Invalid Patient Id or Password</div>
@@ -136,9 +162,9 @@ function Login() {
 				</MDBCol>
 				<MDBCol sm='6' className='d-none d-sm-block px-0'>
 					<img
-						src='/images/maledoctor.png'
+						src='/images/voice.png'
 						alt='Login image'
-						className='w-100'
+						className='custom-height'
 						style={{ objectFit: "cover", objectPosition: "left" }}
 					/>
 				</MDBCol>

@@ -1,24 +1,23 @@
 import React from "react";
+
 import { Routes, Route } from "react-router-dom";
+
 import Login from "./Login";
 import Register from "./Register";
-import PredictForm from "./PredictForm";
-import Report from "./Report";
-import PastData from "./PastData";
-import ForgotPassword from "./ForgotPassword";
+import HelloComponent from "./HelloComponent";
+import io from "socket.io-client";
+import FileShare from "./FileShare";
+
+const socket = io.connect("http://localhost:3001");
 
 function App() {
 	return (
-		<div>
-			<Routes>
-				<Route path='/' element={<Login />} />
-				<Route path='/register' element={<Register />} />
-				<Route path='/predict' element={<PredictForm />} />
-				<Route path='/report' element={<Report />} />
-				<Route path='/pastdata' element={<PastData />} />
-				<Route path='/forgot' element={<ForgotPassword />} />
-			</Routes>
-		</div>
+		<Routes>
+			<Route path='/' element={<Login />} />
+			<Route path='/plan' element={<HelloComponent />} />
+			<Route path='/register' element={<Register />} />
+			<Route path='/file' element={<FileShare socket={socket} />} />
+		</Routes>
 	);
 }
 
